@@ -1,4 +1,4 @@
-// SudokuSolver exe icon author: Icons made by Icons made by <a href="http://www.freepik.com/" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
+// SudokuSolver exe icon author: Icons made by <a href="http://www.freepik.com/" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -7,10 +7,8 @@ import java.awt.Font;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridLayout;
-
 import java.io.File;
 import java.io.IOException;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -23,6 +21,13 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+
+/* 
+ * Author: Kia Pezesh
+ * Description: GUI.java uses Swing to draw a visual Sudoku solving application. 
+ *              This application allows the user to insert a Sudoku puzzle (by hand or by uploading a formated .txt file)
+ *              and solves the puzzle using backtracking, which is contained in Solver.java.
+ */
 public class GUI implements ActionListener {
     private static JFrame frame;
     private static JPanel gridPanel;
@@ -38,13 +43,21 @@ public class GUI implements ActionListener {
     private static int[][] sudoku;
     private static Solver solver;
 
-    //initialize GUI 
+    /*
+     * Name:        initialize()
+     * Description: The initialize() method sets up all Swing components
+     *              and draws the GUI for the application and fills the visible
+     *              Sudoku board with the contents of 2D array sudoku[][].
+     *              This method is only to be called once at application startup.
+     * @params:     null
+     * @returns:    void
+     */
     private static void initialize() {
         GUI gooey = new GUI();
         // * frame setup
         frame.setSize(600, 500); // x, y
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        // add title and panels
+            // add title and panels
         title = new JLabel("Sudoku Solver v0.1", SwingConstants.CENTER);
         title.setPreferredSize(new Dimension(600, 16));
         frame.add(title, BorderLayout.PAGE_START);
@@ -55,34 +68,34 @@ public class GUI implements ActionListener {
         // * gridPanel setup
         gridPanel.setBackground(Color.lightGray);
         gridPanel.setLayout(new GridLayout(9, 9));
-        //draw grid (using borders)
-        for (int i = 0; i < 9; i++) {
-            for (int j = 0; j < 9; j++) {
-                cells[i][j] = new JTextField(1);
-                cells[i][j].setEditable(false);
-                //check for corners
-                if (isCorner(i, j)) {
-                    cells[i][j].setBorder(BorderFactory.createMatteBorder(0, 1, 3, 3, Color.black));
-                }// top, left, bottom, right, color
-                else if (i == 2 || i == 5) {
-                    cells[i][j].setBorder(BorderFactory.createMatteBorder(0, 1, 3, 1, Color.black));
-                } else if (j == 2 || j == 5) {
-                    cells[i][j].setBorder(BorderFactory.createMatteBorder(1, 1, 1, 3, Color.black));
+            //draw grid (using borders)
+        for (int row = 0; row < 9; row++) {
+            for (int col = 0; col < 9; col++) {
+                cells[row][col] = new JTextField(1);
+                cells[row][col].setEditable(false);
+                cells[row][col].setFont(font);
+                cells[row][col].setHorizontalAlignment(JTextField.CENTER);
+                //check for "corners" and draw appropriate Sudoku board lines
+                if (isCorner(row, col)) {
+                    cells[row][col].setBorder(BorderFactory.createMatteBorder(0, 1, 3, 3, Color.black));
+                } else if (row == 2 || row == 5) {
+                    cells[row][col].setBorder(BorderFactory.createMatteBorder(0, 1, 3, 1, Color.black));
+                } else if (col == 2 || col == 5) {
+                    cells[row][col].setBorder(BorderFactory.createMatteBorder(1, 1, 1, 3, Color.black));
                 } else {
-                    cells[i][j].setBorder(BorderFactory.createLineBorder(Color.black, 1));
+                    cells[row][col].setBorder(BorderFactory.createLineBorder(Color.black, 1));
                 }
-                gridPanel.add(cells[i][j]);
+                gridPanel.add(cells[row][col]);
             }
         }
-
         // * menuPanel setup
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
         menuPanel.setBackground(Color.lightGray);
         menuPanel.setPreferredSize(new Dimension(116, 500));
         menuPanel.add(Box.createVerticalGlue());
-        // spacing
+            // spacing
         Dimension spacing = new Dimension(0, 30);
-        //menuPanel.add(Box.createRigidArea(spacing));
+            //menuPanel.add(Box.createRigidArea(spacing));
         confirmButton = new JButton("Confirm Input");
         confirmButton.addActionListener(gooey);
         confirmButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -122,7 +135,15 @@ public class GUI implements ActionListener {
         menuPanel.add(Box.createRigidArea(spacing)); // x, y?
         menuPanel.add(Box.createVerticalGlue());
     }
-    //check for corners in sudoku grid
+    /* 
+     * Name:        isCorner() 
+     * Description: This method checks the current row, col position in the sudoku board to check if a darkened border line is needed.
+     *              This method aids in the drawing of the two verical and horizontal lines in a Sudoku board which separate the 9 3x3 subgrids.
+     * @params:     int row - the horizontal position of the current cell of the Sudoku board.
+     *              int col - the vertical position of the current cell of the Sudoku board.
+     * @returns:    boolean true - if the current cell is a subgrid "corner".
+     *              boolean false - if the current cell is not a subgrid "corner".
+     */
     private static boolean isCorner(int row, int col) {
         if (row == 2) {
             if (col == 2 || col == 5)
@@ -134,7 +155,14 @@ public class GUI implements ActionListener {
         }
         return false;
     }
-    //fill grid with contents of sudoku[][]
+    /*
+     * Name:        populateGridPanel()
+     * Description: This method populates the visible Suoku board with the 
+     *              contents of sudoku[][], which is filled by the end-user by 
+     *              either manually insertion or by file upload. 
+     * @params:     null
+     * @returns:    void
+     */
     private static void populateGridPanel() {
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
@@ -151,7 +179,15 @@ public class GUI implements ActionListener {
             }
         }
     }
-    //update cells[][] with solver results (to be called from the Solver class)
+    /*
+     * Name:        updateDisplay()
+     * Description: This method inserts a value 'n' given by Solver.java into cells[row][col] and is made visible in the gridpanel.
+     *              This method is public and is meant to be called from Solver.java.
+     * @params:     int row - the vertical alignment of the current grid cell.
+     *              int col - the horizontal alignment of the current cell.
+     *              int n   - the integer value to be placed into the current cell.
+     * @returns:    void
+     */
     public void updateDisplay(int row, int col, int n) {
         if (n == 0) {
             cells[row][col].setText("");
@@ -160,13 +196,20 @@ public class GUI implements ActionListener {
         cells[row][col].setText(Integer.toString(n));
         cells[row][col].setForeground(Color.gray);
     }
-    //clear board & set editable
+    /*
+     * Name:        clearBoard()
+     * Description: This method clears both sudoku[][] and cells[][]. The Sudoku gridpanel visible to the user is cleared and set to be editable.
+     *              This prepares the application to receive a user-inputted Sudoku puzzle. 
+     * @params:     null
+     * @returns:    void
+     */
     private void clearBoard() {
         for (int i=0;i<9;i++) {
             for (int j=0;j<9;j++) {
                 sudoku[i][j] = 0;
                 cells[i][j].setText("");
                 cells[i][j].setEditable(true);
+                // limit user input per-cell to one integer between 1-9
                 cells[i][j].setDocument(new JTextFieldCharLimit(1));
                 cells[i][j].setFont(font);
                 cells[i][j].setHorizontalAlignment(JTextField.CENTER);
@@ -174,17 +217,25 @@ public class GUI implements ActionListener {
             }
         }
     }
-    //check if sudoku grid is empty
+    /*
+     * Name:        isEmpty()
+     * Description: This method checks if a given 2D array is empty.
+     * @params:     int[][] array - The 2D array to be checked.
+     * @returns:    boolean true - if array[][] is empty.
+     *              boolean false - if a non-zero value is contained in array[][].
+     */
     private static boolean isEmpty (int[][] array) {
-        for (int i = 0; i < array.length; i++) {
-            for (int j = 0; j < array.length; j++) {
-                if (array[i][j] == 0) continue;
-                return false;
-            }
-        }
-        return true;
+        if (array == null) return true;
+        return false;
     }
-    //read user input into sudoku[][]
+
+    /*
+     * Name:        readInput()
+     * Description: Reads the contents of cells[][] and writes it into sudoku[][]. 
+     *              This method is meant to be used to read user-inputted Sudoku board.
+     * @params:     null
+     * @returns:    void     
+     */
     private static void readInput() {
         for (int i = 0; i < cells.length; i++) {
             for (int j = 0; j < cells.length; j++) {
@@ -198,19 +249,27 @@ public class GUI implements ActionListener {
             System.out.println();
         }
     }
-    //validate sudoku[][] (to be called following readInput())
+    /*
+     * Name:        validate()
+     * Description: This method takes the user-inputted Sudoku puzzle and checks if it is solvable by calling validiateEntry() in Solver.java. (eg. does not break Sudoku puzzle rules)
+     *              The validation checking is done on 2D array sudoku[][], so this method is meant to be called after readInput() has been called.
+     *              Invalid entries are highlited red unit corrected.
+     * @params:     null
+     * @returns:    boolean true - if Sudoku puzzle is valid.
+     *              boolean false - if Sudoku puzzle is not valid.
+     */
     private boolean validate() {
         boolean result = true;
         int[] temp = new int[3];
         for (int i = 0; i < cells.length; i++) {
             for (int j = 0; j < cells.length; j++) {
-                //store index & value of current sudoku cell
+                //store value & index of current sudoku cell
                 temp[0] = sudoku[i][j];
                 temp[1] = i; temp[2] = j;
                 //temporarily set to 0 
                 sudoku[i][j] = 0;
                 //validate
-                if (!solver.validate_entry(sudoku, temp[0], i, j)) {
+                if (!solver.validateEntry(sudoku, temp[0], i, j)) {
                     result = false;
                     System.out.println("entry "+temp[0]+" at "+temp[1]+", "+temp[2]+" invalid");
                     cells[i][j].setForeground(Color.red);
@@ -223,12 +282,18 @@ public class GUI implements ActionListener {
         return result;
     }
     //show invalid file message in the title JLabel. To be called from Solver.java
+    /*
+     * Name:        invalid_file()
+     * Description: Updates GUI title JLabel to communicate that the user's chosen file was not found.
+     * @params:     null
+     * @returns:    void
+     */
     public void invalid_file() {
         title.setText("File not found");
         title.setForeground(Color.red);
     } 
 
-// !! MAIN METHOD ~~~~~~~~~~~~~~~
+// !! MAIN METHOD 
     public static void main(String[] args) throws Exception {
         //initialize objects & arrays
         frame = new JFrame();
@@ -243,21 +308,20 @@ public class GUI implements ActionListener {
         //make visible
         frame.setVisible(true);
     }
-
+// ! Buttons
     @Override
     public void actionPerformed(ActionEvent e) {
         // * Solve
-        //attempt to solve sudoku[][]. Timeout if unable within ~X~ seconds
+        //attempt to solve sudoku[][].
         if (e.getSource() == solveButton) {
-            if (isEmpty(sudoku)) return;
-            // solve
-            System.out.println("Solve");
+            if (isEmpty(sudoku)) return;   
+            //System.out.println("Solve");
             solver.lock = false;
-            solver.solve_grid(sudoku);
-            System.out.println("Solved");
+            solver.solveGrid(sudoku);
+            //System.out.println("Solved");
         }
 
-        // * show original puzzle
+        // * Show Original Puzzle
         //show unsolved puzzle (populates the grid with contents of sudoku[][])
         else if (e.getSource() == unsolveButton){
             System.out.println("Show Original");
@@ -267,11 +331,12 @@ public class GUI implements ActionListener {
         // * Insert Puzzle
         //allows user to input their own puzzle cell by cell
         else if (e.getSource() == insertPuzzleButton){
-            title.setText("Sudoku Solver v0.1");
-            title.setForeground(Color.black);
-            //let user input a sudoku board
-            System.out.println("Inset Puzzle");
-            //clear gridpanel & set editable to true
+            //clear error message if there is one; display application title
+            if (title.getText() != "Sudoku Solver v0.1") {
+                title.setText("Sudoku Solver v0.1");
+                title.setForeground(Color.black);
+            }
+            //let user input a sudoku board: clear gridpanel & set editable to true
             clearBoard();
             //update buttons
             confirmButton.setVisible(true);
@@ -282,14 +347,17 @@ public class GUI implements ActionListener {
         }
 
         // * Confirm Input
-        //reads & validates user input
+        //reads & validates user inputted Sudoku Puzzle
         else if (e.getSource() == confirmButton) {
-            //read user input
+            //copy user input from cells[][] to sudoku[][]
             readInput();
             //check if valid
             if (validate()) {
-                title.setText("Sudoku Solver v0.1");
-                title.setForeground(Color.black);
+                //clear error message if there is one; display application title
+                if (title.getText() != "Sudoku Solver v0.1") {
+                    title.setText("Sudoku Solver v0.1");
+                    title.setForeground(Color.black);
+                }
                 //update buttons
                 confirmButton.setVisible(false);
                 solveButton.setVisible(true);
@@ -309,14 +377,16 @@ public class GUI implements ActionListener {
             }
         }
 
-        // *OpenPuzzleButton 
-        //assumes the selected file is in the correct format.
+        // *Open Puzzle
+        //Let user open a .txt file containing the desired Sudoku Puzzle. Assumes the selected file is in the correct format.
         else if (e.getSource() == openPuzzleButton){
-            //in case previously chosen file was not found
-            title.setText("Sudoku Solver v0.1");
-            title.setForeground(Color.black);
+            //clear error message if there is one; display application title
+            if (title.getText() != "Sudoku Solver v0.1") {
+                title.setText("Sudoku Solver v0.1");
+                title.setForeground(Color.black);
+            }
 
-            //open sudoku board file
+            //open file containing sudoku puzzle 
             System.out.println("Open Puzzle");
             JFileChooser chooser = new JFileChooser();
             FileNameExtensionFilter filter = new FileNameExtensionFilter("Text files", "txt");
@@ -327,7 +397,7 @@ public class GUI implements ActionListener {
                 File selectedFile = chooser.getSelectedFile();
                 System.out.println("Selected file: "+selectedFile.getAbsolutePath());
                 try {
-                    sudoku = solver.populate_grid(selectedFile.getAbsolutePath(), sudoku);
+                    sudoku = solver.populateGrid(selectedFile.getAbsolutePath(), sudoku);
                 } catch (IOException ex) {
                     ex.printStackTrace();
                     return;
